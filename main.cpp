@@ -2,19 +2,26 @@
 #include "storage.h"
 #include "ping.h"
 #include "string_utils.h"
+#include "parser.h"
 #include <iostream>
 #include <string>
 #include <chrono>
 #include <thread>
 #include <vector>
+#include <unistd.h>
 
 using namespace std::chrono_literals;
 using namespace std::string_literals;
 
 void handle_client_connection_task(ListenSocketConnection* server_connection, socket_descriptor client);
-void ping_task();
+void ping_task(const std::string& ip, int count_echo_requests);
 
 int main(){
+    if (daemon(0, 0) == -1){
+        std::cout << "не удалось запустить в режиме фонового процесса\n";
+        return 0;
+    }
+    std::cout << "test-pinger запущен\n";
     ListenSocketConnection server_connection(65236);
     while (true){
         auto client = server_connection.accept_client_connection();
@@ -42,8 +49,22 @@ void handle_client_connection_task(ListenSocketConnection* server_connection, so
                     continue;
                 }
                 if (!is_ip_address(msg_parts[1])){
-                    server_connection->send_msg(client, "первый аргумент не является IP-адресом"s);
+                    server_connection->send_msg(client, "первый аргумент не является IP-адресом\n"s);
                     continue;
+                }
+                if (!is_int_number(msg_parts[2])){
+                    server_connection->send_msg(client, "второй аргумент не является числом\n"s);
+                    continue;
+                }
+
+                try{
+                    std::string ip = msg_parts[1];
+                    int echo_requests_count = std::stoi(msg_parts[2]);
+                    std::thread th(ping_task, ip, echo_requests_count);
+                    th.detach();
+                    server_connection->send_msg(client, "ok\n"s);
+                } catch (std::exception e){
+                    server_connection->send_msg(client, "error\n"s);
                 }
             } else if (msg_parts[0] == "info"s){
                 if (msg_parts.size() != 1){
@@ -65,6 +86,8 @@ void handle_client_connection_task(ListenSocketConnection* server_connection, so
 }
 
 
-void ping_task(){
-
+void ping_task(const std::string& ip, int count_echo_requests){
+    PingInfo ping_info = ping(ip, count_echo_requests, 300ms);
+    Storage& storage = Storage::instance();
+    storage.add_statistics(ip, ping_info.echo_replies, ping_info.echo_requests);
 }

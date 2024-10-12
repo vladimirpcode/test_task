@@ -5,6 +5,7 @@
 #include <sys/time.h>
 #include <random>
 #include <iostream>
+#include <unistd.h>
 
 
 icmp_checksum calculate_checksum(const void* data, size_t len){
@@ -68,11 +69,14 @@ PingInfo ping(const std::string& ip, size_t count_requests, std::chrono::millise
         socklen_t response_address_info_size = sizeof(response_address_info);
         int received_bytes = recvfrom(sock, receive_buffer, sizeof(receive_buffer), 0, (sockaddr*)&response_address_info, (socklen_t*)&response_address_info_size);
         if (received_bytes >= 8 && icmp_response->type == 0 
-            && icmp_response->code == 0
-            && std::string(inet_ntoa(response_address_info.sin_addr)) == ip){
+                && icmp_response->code == 0
+                && std::string(inet_ntoa(response_address_info.sin_addr)) == ip){
             count_echo_replies++;
             std::cout << "получен ответ от " << std::string(inet_ntoa(response_address_info.sin_addr)) << "\n";
+        } else {
+            std::cout << ip << " не доступен\n";
         }
+        usleep(1000000);
     }
     PingInfo info;
     info.destination_ip = ip;

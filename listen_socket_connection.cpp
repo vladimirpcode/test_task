@@ -35,7 +35,7 @@ ListenSocketConnection::~ListenSocketConnection(){
 
 
 socket_descriptor ListenSocketConnection::accept_client_connection(){
-    socket_descriptor client = accept(m_socket_descriptor, NULL, NULL);
+    socket_descriptor client = accept(m_socket_descriptor, nullptr, nullptr);
     if (client == -1){
         throw ClientConnectionErrorException("Не удалось принять клиентское подключение");
     }

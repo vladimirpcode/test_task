@@ -48,19 +48,42 @@ private:
 };
 
 uint32_t parse_number(ParsingWrapper& wrap){
-    
+    uint32_t num = 0;
+    if (!is_number(wrap.ch)){
+        throw ExcpectedException("ожидалась цифра");
+    }
+    while (is_number(wrap.ch)){
+        num = num * 10 + (wrap.ch - '0');
+        wrap.get_next();
+    }
+    return num;
 }
 
 bool is_ip_address(const std::string& str){
     try{
         ParsingWrapper wrap(str);
-        uint32_t octet1 = parse_number();
-
+        for(int i = 0; i < 3; ++i){
+            uint32_t octet = parse_number(wrap);
+            if (octet > 255u){
+                return false;
+            }
+            wrap.check('.');
+        }
+        uint32_t octet = parse_number(wrap);
+        if (octet > 255u){
+            return false;
+        }
+        return true;
     } catch (ExcpectedException e){
         return false;
     }
 }
 
 bool is_int_number(const std::string& str){
-
+    for (auto c : str){
+        if (!is_number(c)){
+            return false;
+        }
+    }
+    return true;
 }

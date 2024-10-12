@@ -13,14 +13,18 @@ ping.o: ping.h ping.cpp
 parser.o: parser.h parser.cpp
 	g++ -c parser.cpp -o parser.o
 
-test: main.cpp listen_socket_connection.o storage.o string_utils.o ping.o
+test-pinger: main.cpp listen_socket_connection.o storage.o string_utils.o ping.o parser.o
 	g++ main.cpp \
 		listen_socket_connection.o \
 		storage.o \
 		string_utils.o \
 		ping.o \
-		-o test_app
+		parser.o \
+		-o test-pinger
+	sudo killall test-pinger
+	sudo cp ./test-pinger /usr/local/bin/test-pinger
 
 clean:
 	-rm *.o
-	-rm test_app
+	-sudo rm /usr/local/bin/test-pinger
+	-rm test-pinger
