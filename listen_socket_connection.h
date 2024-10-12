@@ -16,7 +16,7 @@ public:
     void send_msg(socket_descriptor client, const std::string msg);
 private:
     static constexpr inline size_t RECEIVE_BUFFER_SIZE = 1024;
-    static constexpr inline size_t MAX_CLIENT_CONNECTIONS = 1;
+    static constexpr inline size_t MAX_CLIENT_CONNECTIONS = 5;
     tcp_port m_port_number;
     socket_descriptor m_socket_descriptor;
     char m_receive_buffer[RECEIVE_BUFFER_SIZE];

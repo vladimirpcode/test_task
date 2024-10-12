@@ -10,6 +10,9 @@ string_utils.o: string_utils.h string_utils.cpp
 ping.o: ping.h ping.cpp
 	g++ -c ping.cpp -o ping.o
 
+parser.o: parser.h parser.cpp
+	g++ -c parser.cpp -o parser.o
+
 test: main.cpp listen_socket_connection.o storage.o string_utils.o ping.o
 	g++ main.cpp \
 		listen_socket_connection.o \
