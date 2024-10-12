@@ -2,10 +2,15 @@
 #include <iostream>
 #include "storage.h"
 #include <string>
+#include <chrono>
+#include "ping.h"
 
+using namespace std::chrono_literals;
 using namespace std::string_literals;
 
 int main(){
+    auto result = ping("192.168.43.1", 10, 300ms);
+    return 0;
     Storage& storage = Storage::instance();
     try{
         storage.add_statistics("192.168.1.1", 1, 2);
