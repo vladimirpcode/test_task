@@ -25,7 +25,7 @@ test-pinger: main.cpp listen_socket_connection.o storage.o string_utils.o ping.o
 deb: test-pinger
 	-mkdir ./.target/usr/local/bin -p
 	cp ./test-pinger ./.target/usr/local/bin/
-	dpkg-deb --build "$(CURDIR)/.target" test-pinger1.deb
+	dpkg-deb --build "$(CURDIR)/.target" test-pinger.deb
 
 clean:
 	-rm *.o

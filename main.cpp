@@ -20,13 +20,12 @@ void ping_task(const std::string& ip, int count_echo_requests);
 bool is_other_process_running(int my_pid, const std::string& my_process_name);
 
 int main(){
-    std::cout << "test-pinger запущен\n";
     if(is_other_process_running(getpid(), "test-pinger"s)) {
-        std::cout << "запущена другая копия процесса\n";
+        std::cout << "Запущена другая копия процесса. Завешаю работу...\n";
         exit(0);
     }
-
-    if (daemon(0, 1) == -1){
+    std::cout << "test-pinger запущен\n";
+    if (daemon(0, 0) == -1){
         std::cout << "не удалось запустить в режиме фонового процесса\n";
         exit(0);
     }

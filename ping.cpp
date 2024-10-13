@@ -7,6 +7,17 @@
 #include <iostream>
 #include <unistd.h>
 
+struct IcmpHeader{
+    uint8_t type;
+    uint8_t code;
+    uint16_t checksum;
+    // специфичные для эхо-ICMP поля
+    uint16_t identifier;
+    uint16_t sequence;
+    uint64_t payload;
+};
+
+using icmp_checksum = uint16_t;
 
 icmp_checksum calculate_checksum(const void* data, size_t len){
     auto word16_ptr = reinterpret_cast<const uint16_t*>(data);
