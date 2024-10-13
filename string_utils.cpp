@@ -9,7 +9,7 @@ std::string trim(const std::string& str){
         return ""s;
     }
     size_t end_index = str.size() - 1;
-    while (end_index != start_index && std::isspace(str.c_str()[end_index])){
+    while (end_index != start_index && (std::isspace(str.c_str()[end_index]) || str.c_str()[end_index] == 0)){
         end_index--;
     }
 
@@ -60,6 +60,30 @@ std::vector<std::string> split_by_newline(const std::string& str){
         index++;
     }
     if (part.size() != 0){
+        parts.push_back(part);
+    }
+    return parts;
+}
+
+
+std::vector<std::string> split(const std::string& str, char delimiter){
+    std::vector<std::string> parts;
+    size_t index = 0;
+    std::string part = ""s;
+    char c;
+    while (index != str.size()){
+        c = str.c_str()[index];
+        if (c == delimiter){
+            if (part != ""s){
+                parts.push_back(part);
+                part = ""s;
+            }
+        } else {
+            part += c;
+        }
+        index++;
+    }
+    if (c != delimiter && part != ""s){
         parts.push_back(part);
     }
     return parts;

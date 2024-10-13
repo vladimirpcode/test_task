@@ -1,0 +1,4 @@
+#!/bin/bash
+killall test-pinger
+sleep 1
+exit 0

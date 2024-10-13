@@ -9,25 +9,65 @@
 #include <thread>
 #include <vector>
 #include <unistd.h>
+#include <filesystem>
+#include <fstream>
 
 using namespace std::chrono_literals;
 using namespace std::string_literals;
 
 void handle_client_connection_task(ListenSocketConnection* server_connection, socket_descriptor client);
 void ping_task(const std::string& ip, int count_echo_requests);
+bool is_other_process_running(int my_pid, const std::string& my_process_name);
 
 int main(){
-    if (daemon(0, 0) == -1){
-        std::cout << "не удалось запустить в режиме фонового процесса\n";
-        return 0;
-    }
     std::cout << "test-pinger запущен\n";
+    if(is_other_process_running(getpid(), "test-pinger"s)) {
+        std::cout << "запущена другая копия процесса\n";
+        //exit(0);
+    }
+
+    if (daemon(0, 1) == -1){
+        std::cout << "не удалось запустить в режиме фонового процесса\n";
+        exit(0);
+    }
     ListenSocketConnection server_connection(65236);
     while (true){
         auto client = server_connection.accept_client_connection();
         std::thread th(handle_client_connection_task, &server_connection, client);
         th.detach();
     }
+}
+
+bool is_other_process_running(int my_pid, const std::string& my_process_name){
+    for (auto const& dir_entry : std::filesystem::directory_iterator("/proc")){
+        try
+        {
+            std::string proc_dir = dir_entry.path().filename();
+            if (!is_int_number(proc_dir)){
+                continue;
+            }
+            if (std::stoi(proc_dir) == my_pid){
+                continue;
+            }
+            std::ifstream fin(dir_entry.path().string() + "/cmdline"s);
+            std::string line;
+            std::getline(fin, line);
+            auto parts = split(line, '/');
+            if (parts.size() == 0){
+                continue;
+            }
+            auto proc_name = trim(parts[parts.size()-1]);
+            if (proc_name == my_process_name){
+                return true;
+            }
+        }
+        catch(const std::exception& e)
+        {
+
+        }
+        
+    }
+    return false;
 }
 
 void handle_client_connection_task(ListenSocketConnection* server_connection, socket_descriptor client){

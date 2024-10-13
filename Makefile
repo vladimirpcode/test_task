@@ -21,10 +21,12 @@ test-pinger: main.cpp listen_socket_connection.o storage.o string_utils.o ping.o
 		ping.o \
 		parser.o \
 		-o test-pinger
-	sudo killall test-pinger
-	sudo cp ./test-pinger /usr/local/bin/test-pinger
+
+deb: test-pinger
+	cp ./test-pinger ./.target/usr/local/bin/
+	dpkg-deb --build "$(CURDIR)/.target" test-pinger1.deb
 
 clean:
 	-rm *.o
-	-sudo rm /usr/local/bin/test-pinger
-	-rm test-pinger
+	-rm test-pinger ./.target/usr/local/bin/test-pinger
+	-rm *.deb
