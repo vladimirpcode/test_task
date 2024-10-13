@@ -5,5 +5,5 @@ Package: test-pinger
 Priority: optional
 Section: unknown
 Version: 1
-Depends: libstdc++6,libm6,libgcc_s1,libc6
+Depends: libstdc++6,libm6,libgcc-s1,libc6
 Essential: no

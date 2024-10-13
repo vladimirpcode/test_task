@@ -23,7 +23,7 @@ int main(){
     std::cout << "test-pinger запущен\n";
     if(is_other_process_running(getpid(), "test-pinger"s)) {
         std::cout << "запущена другая копия процесса\n";
-        //exit(0);
+        exit(0);
     }
 
     if (daemon(0, 1) == -1){
