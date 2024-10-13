@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <filesystem>
 #include <fstream>
+#include <sstream>
 
 using namespace std::chrono_literals;
 using namespace std::string_literals;
@@ -84,15 +85,15 @@ void handle_client_connection_task(ListenSocketConnection* server_connection, so
             }
             if (msg_parts[0] == "ping"s){
                 if (msg_parts.size() != 3){
-                    server_connection->send_msg(client, "у команды ping должно быть два аргумента:\nping <ip> <count>\n"s);
+                    server_connection->send_msg(client, "у команды ping должно быть два аргумента:\nping <ip> <count>\n\n"s);
                     continue;
                 }
                 if (!is_ip_address(msg_parts[1])){
-                    server_connection->send_msg(client, "первый аргумент не является IP-адресом\n"s);
+                    server_connection->send_msg(client, "первый аргумент не является IP-адресом\n\n"s);
                     continue;
                 }
                 if (!is_int_number(msg_parts[2])){
-                    server_connection->send_msg(client, "второй аргумент не является числом\n"s);
+                    server_connection->send_msg(client, "второй аргумент не является числом\n\n"s);
                     continue;
                 }
 
@@ -101,22 +102,28 @@ void handle_client_connection_task(ListenSocketConnection* server_connection, so
                     int echo_requests_count = std::stoi(msg_parts[2]);
                     std::thread th(ping_task, ip, echo_requests_count);
                     th.detach();
-                    server_connection->send_msg(client, "ok\n"s);
+                    server_connection->send_msg(client, "ok\n\n"s);
                 } catch (std::exception e){
-                    server_connection->send_msg(client, "error\n"s);
+                    server_connection->send_msg(client, "error\n\n"s);
                 }
             } else if (msg_parts[0] == "info"s){
                 if (msg_parts.size() != 1){
-                    server_connection->send_msg(client, "у команды info не должно быть аргументов\n"s);
+                    server_connection->send_msg(client, "у команды info не должно быть аргументов\n\n"s);
                     continue;
                 }
                 Storage& storage = Storage::instance();
                 auto statistics_records = storage.get_statistics_records();
                 for (auto& [ip, record] : statistics_records){
-                    server_connection->send_msg(client, ip + ": "s + std::to_string(record.success_pings_count) + "/"s + std::to_string(record.all_pings_count) + "\n"s);
+                    std::stringstream ss;
+                    ss << std::setfill('.') <<  std::setw(16) << std::left << ip << ": "s 
+                        << std::to_string(record.success_pings_count) 
+                        << "/"s  << std::to_string(record.all_pings_count) 
+                        << "\n"s;
+                    server_connection->send_msg(client, ss.str());
                 }
+                server_connection->send_msg(client, "\n"s);
             } else {
-                server_connection->send_msg(client, "неизвестная команда: "s + msg_parts[0] + "\n"s);
+                server_connection->send_msg(client, "неизвестная команда: "s + msg_parts[0] + "\n\n"s);
             }
         } catch (std::exception e){
             stop_flag = true;
